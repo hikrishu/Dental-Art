@@ -2,14 +2,19 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Create the email transporter using Gmail SMTP
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Uses the generated App Password from .env
-  },
-});
+// Helper to get transporter
+const getTransporter = () => {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    connectionTimeout: 10000, // 10 seconds
+  });
+};
 
 /**
  * Utility to send a contact form email
@@ -38,6 +43,7 @@ export const sendContactEmail = async ({ name, email, message }) => {
   };
 
   // Execute sending mail
+  const transporter = getTransporter();
   return await transporter.sendMail(mailOptions);
 };
 
@@ -93,5 +99,6 @@ export const sendAppointmentEmail = async ({ fullName, phone, email, service, pr
     `,
   };
 
+  const transporter = getTransporter();
   return await transporter.sendMail(mailOptions);
 };
