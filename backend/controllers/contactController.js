@@ -12,6 +12,7 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
  * 3. Returns success/error JSON response
  */
 export const submitContactMessage = async (req, res) => {
+  console.log('✉️ Received new Contact Form message...');
   // Trim all incoming string values upfront
   const name    = (req.body.name    || '').trim();
   const email   = (req.body.email   || '').trim().toLowerCase();
@@ -33,6 +34,7 @@ export const submitContactMessage = async (req, res) => {
   try {
     await sendContactEmail({ name, email, message });
 
+    console.log(`✅ Contact message sent for ${name}`);
     return res.status(200).json({
       success: true,
       message: 'Your message has been sent successfully! We will get back to you soon.',

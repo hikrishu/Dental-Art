@@ -17,12 +17,14 @@ const connectDB = async () => {
   }
 
   try {
+    console.log('⏳ Attempting to connect to MongoDB...');
     const conn = await mongoose.connect(uri);
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Connected Successfully!`);
+    console.log(`   Host: ${conn.connection.host}`);
+    console.log(`   Database: ${conn.connection.name}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // Warn but do not crash the server — email sending still works
-    console.warn('   Server will continue without MongoDB. Fix MONGO_URI to enable appointment saving.');
+    console.warn('   Server will continue without MongoDB. Fix MONGO_URI in Render dashboard to enable saving.');
   }
 };
 

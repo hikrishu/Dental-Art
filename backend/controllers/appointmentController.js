@@ -14,6 +14,7 @@ const isValidPhone = (phone) => /^[\d\s\+\-\(\)]{7,20}$/.test(phone);
  * 4. Returns success/error JSON
  */
 export const createAppointment = async (req, res) => {
+  console.log('📝 Received new Appointment Request...');
   // Guard: MongoDB must be connected to save appointments
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
@@ -55,7 +56,7 @@ export const createAppointment = async (req, res) => {
   }
 
   try {
-    // Save appointment to MongoDB
+    // 1. Save appointment to MongoDB (The primary record)
     const appointment = await Appointment.create({
       fullName,
       phone,
@@ -66,20 +67,27 @@ export const createAppointment = async (req, res) => {
       message,
     });
 
-    // Send email notification to the clinic
-    await sendAppointmentEmail({ fullName, phone, email, service, preferredDate, preferredTime, message });
+    // 2. Attempt to send email notification (The optional alert)
+    try {
+      await sendAppointmentEmail({ fullName, phone, email, service, preferredDate, preferredTime, message });
+    } catch (emailError) {
+      // Log the email failure but do NOT crash the response
+      console.error('⚠️ Gmail Service Blocked or Failed:', emailError.message);
+      console.warn('   The appointment was saved to the database, but the email alert could not be sent.');
+    }
 
+    console.log(`✅ Appointment saved for ${fullName}`);
     return res.status(201).json({
       success: true,
-      message: 'Appointment request submitted successfully! We will contact you shortly to confirm.',
+      message: 'Appointment request submitted successfully! Our team will review it shortly.',
       appointment,
     });
 
   } catch (error) {
-    console.error('Error creating appointment:', error);
+    console.error('❌ Database Error creating appointment:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to submit appointment request. Please try again.',
+      error: 'Failed to save appointment request. Please try again.',
     });
   }
 };

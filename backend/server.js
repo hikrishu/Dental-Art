@@ -17,7 +17,14 @@ const app = express();
 // --- 1. Connect to MongoDB ---
 connectDB();
 
-// --- 2. Security Middleware ---
+// --- 2. Request Logger (For Render Debugging) ---
+app.use((req, res, next) => {
+  console.log(`📡 [${new Date().toISOString()}] ${req.method} request to ${req.url}`);
+  console.log(`   Origin: ${req.get('origin') || 'Local/No Origin'}`);
+  next();
+});
+
+// --- 3. Security Middleware ---
 // Set security HTTP headers
 app.use(helmet());
 
@@ -66,5 +73,8 @@ app.use((err, req, res, next) => {
 // --- 4. Start Server ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log('🚀 DENTAL ART BACKEND IS LIVE');
+  console.log(`🔗 URL: http://localhost:${PORT}`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('📝 Listening for frontend requests...');
 });
