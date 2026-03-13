@@ -36,11 +36,11 @@ const appointmentSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
-    // Tracks the state of the request - useful for future admin panel
+    // Tracks the state of the request - useful for admin panel
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'cancelled'],
-      default: 'pending',
+      enum: ['New', 'Contacted', 'Confirmed', 'Completed', 'Cancelled'],
+      default: 'New',
     },
   },
   {

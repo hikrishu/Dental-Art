@@ -8,6 +8,9 @@ import xss from 'xss-clean';
 import connectDB from './config/db.js';
 import contactRoutes from './routes/contactRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
+import adminAuthRoutes from './routes/adminAuthRoutes.js';
+import adminAppointmentRoutes from './routes/adminAppointmentRoutes.js';
+import adminContactRoutes from './routes/adminContactRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -55,6 +58,11 @@ app.use(express.json({ limit: '10kb' })); // Body limit to prevent large payload
 // --- 3. Register Routes ---
 app.use('/api/contact', contactRoutes);
 app.use('/api/appointments', appointmentRoutes);
+
+// --- 4. Admin Dashboard Routes ---
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/admin/appointments', adminAppointmentRoutes);
+app.use('/api/admin/contacts', adminContactRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {

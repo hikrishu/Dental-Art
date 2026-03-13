@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Lenis from 'lenis';
+
+// Layout & Components
 import Navbar from './components/layout/Navbar';
 import HeroSection from './components/sections/HeroSection';
 import TrustSection from './components/sections/TrustSection';
@@ -10,16 +13,35 @@ import BookingSection from './components/sections/BookingSection';
 import ContactSection from './components/sections/ContactSection';
 import Footer from './components/sections/Footer';
 
-function App() {
+// Admin Pages & Auth
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// --- Protected Route Wrapper ---
+const ProtectedRoute = ({ children }) => {
+  const { token, loading } = useAuth();
+  
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
+    </div>
+  );
+  
+  if (!token) return <Navigate to="/login" replace />;
+  
+  return children;
+};
+
+// --- Main Website Landing Page ---
+const Home = () => {
   useEffect(() => {
-    // Disable browser's native scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
+    // Scroll Reset for SPA context
+    window.scrollTo(0, 0);
 
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutQuart
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
@@ -33,27 +55,21 @@ function App() {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
-
     requestAnimationFrame(raf);
 
-    // Force strict reset to top immediately
-    lenis.scrollTo(0, { immediate: true });
-    window.scrollTo(0, 0);
-
-    // Global smooth scroll for anchors
+    // Anchor smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          lenis.scrollTo(target);
+        const href = this.getAttribute('href');
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) lenis.scrollTo(target);
         }
       });
     });
 
-    return () => {
-      lenis.destroy();
-    };
+    return () => lenis.destroy();
   }, []);
 
   return (
@@ -81,6 +97,36 @@ function App() {
       <Footer />
     </div>
   );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Website */}
+          <Route path="/" element={<Home />} />
+          
+          {/* Admin Auth */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected Dashboard */}
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Catch-all Redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
 }
 
 export default App;
+
