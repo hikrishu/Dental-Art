@@ -1,4 +1,5 @@
 import { sendContactEmail } from '../utils/emailService.js';
+import { generateContactWhatsAppLink } from '../utils/whatsappService.js';
 
 /**
  * Simple email format check — no library needed
@@ -32,12 +33,16 @@ export const submitContactMessage = async (req, res) => {
   }
 
   try {
+    // Generate WhatsApp link (optional but provided for frontend flexibility)
+    const whatsappLink = generateContactWhatsAppLink({ name, email, message });
+
     await sendContactEmail({ name, email, message });
 
     console.log(`✅ Contact message sent for ${name}`);
     return res.status(200).json({
       success: true,
       message: 'Your message has been sent successfully! We will get back to you soon.',
+      whatsappLink,
     });
 
   } catch (error) {
@@ -48,3 +53,4 @@ export const submitContactMessage = async (req, res) => {
     });
   }
 };
+

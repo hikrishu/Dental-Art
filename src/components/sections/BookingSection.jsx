@@ -14,6 +14,7 @@ const BookingSection = () => {
 
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
+  const [whatsappLink, setWhatsappLink] = useState('');
 
   const validate = () => {
     const newErrors = {};
@@ -65,6 +66,7 @@ const BookingSection = () => {
 
       if (data.success) {
         setStatus('success');
+        setWhatsappLink(data.whatsappLink || '');
       } else {
         console.error('Submission failed:', data.error);
         setStatus('error');
@@ -111,16 +113,31 @@ const BookingSection = () => {
                 <p className="text-slate-600 max-w-md mx-auto mb-8">
                   Thank you, {formData.fullName}. We have received your appointment request and our team will contact you shortly to confirm the exact time.
                 </p>
-                <Button 
-                  onClick={() => {
-                    setStatus('idle');
-                    setFormData({ fullName: '', phone: '', email: '', service: '', date: '', time: '', message: '' });
-                    setErrors({});
-                  }}
-                  variant="outline"
-                >
-                  Book Another Appointment
-                </Button>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  {whatsappLink && (
+                    <Button 
+                      onClick={() => window.open(whatsappLink, "_blank")}
+                      variant="outline"
+                      className="!bg-[#25D366] !hover:bg-[#128C7E] !border-none !text-white flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.656zm6.29-4.131c1.53.914 3.37 1.395 5.245 1.396 5.335 0 9.67-4.334 9.673-9.667.001-2.584-1.003-5.011-2.831-6.84-1.826-1.827-4.253-2.829-6.838-2.83-5.337 0-9.674 4.334-9.677 9.668-.001 1.918.504 3.785 1.46 5.414l-.955 3.483 3.566-.935zm11.594-5.056c-.322-.161-1.897-.937-2.22-.1.053-.322-.161-.444-.222-.556-.062-.112-.062-.322-.03-.464.03-.142.322-.741.03-.896.111-.112.222-.112.322-.112.112 0 .222.022.322.022.112.022.253.056.386.196.134.142.513.524.513 1.276 0 .752-.547 1.477-.621 1.577-.074.1-1.074 1.64-2.602 2.301-.363.157-.648.252-.869.323-.365.118-.698.101-.961.062-.294-.043-.897-.365-1.025-.718-.127-.352-.127-.655-.089-.718.039-.062.152-.1.32-.181.168-.08.997-.49 1.152-.547.155-.057.259-.084.363.084.103.169.4.498.49.59.09.091.18.113.348.032.168-.08.713-.263 1.347-.84.494-.448.826-.998.922-1.166.095-.168.01-.259-.074-.343-.076-.076-.168-.196-.253-.294-.084-.099-.112-.168-.168-.28-.056-.112-.028-.21-.013-.293.014-.084.155-.386.213-.526z"/>
+                      </svg>
+                      Send via WhatsApp
+                    </Button>
+                  )}
+                  <Button 
+                    onClick={() => {
+                      setStatus('idle');
+                      setFormData({ fullName: '', phone: '', email: '', service: '', date: '', time: '', message: '' });
+                      setErrors({});
+                      setWhatsappLink('');
+                    }}
+                    variant="outline"
+                  >
+                    Book Another Appointment
+                  </Button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">

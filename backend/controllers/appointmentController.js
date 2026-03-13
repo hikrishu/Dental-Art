@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Appointment from '../models/Appointment.js';
 import { sendAppointmentEmail } from '../utils/emailService.js';
+import { generateWhatsAppLink } from '../utils/whatsappService.js';
 
 /** Simple regex helpers — no libraries needed */
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -8,14 +9,10 @@ const isValidPhone = (phone) => /^[\d\s\+\-\(\)]{7,20}$/.test(phone);
 
 /**
  * Controller to handle Appointment Form submissions.
- * 1. Validates and sanitizes input
- * 2. Saves the appointment to MongoDB
- * 3. Sends an email notification
- * 4. Returns success/error JSON
  */
 export const createAppointment = async (req, res) => {
   console.log('📝 Received new Appointment Request...');
-  // Guard: MongoDB must be connected to save appointments
+  
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       success: false,
@@ -23,7 +20,6 @@ export const createAppointment = async (req, res) => {
     });
   }
 
-  // Trim all incoming string values upfront
   const fullName      = (req.body.fullName      || '').trim();
   const phone         = (req.body.phone         || '').trim();
   const email         = (req.body.email         || '').trim().toLowerCase();
@@ -32,7 +28,6 @@ export const createAppointment = async (req, res) => {
   const preferredTime = (req.body.preferredTime || 'Any Time').trim();
   const message       = (req.body.message       || '').trim();
 
-  // Per-field validation with clear, specific messages
   const errors = {};
 
   if (!fullName)                    errors.fullName      = 'Full name is required.';
@@ -43,7 +38,6 @@ export const createAppointment = async (req, res) => {
   if (!service)                     errors.service       = 'Please select a service.';
   if (!preferredDate)               errors.preferredDate = 'Please select a preferred date.';
   else {
-    // Ensure the date is not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const chosen = new Date(preferredDate);
@@ -56,7 +50,7 @@ export const createAppointment = async (req, res) => {
   }
 
   try {
-    // 1. Save appointment to MongoDB (The primary record)
+    // 1. Save appointment to MongoDB
     const appointment = await Appointment.create({
       fullName,
       phone,
@@ -67,20 +61,30 @@ export const createAppointment = async (req, res) => {
       message,
     });
 
-    // 2. Attempt to send email notification (The optional alert)
+    // 2. Generate WhatsApp Link
+    const whatsappLink = generateWhatsAppLink({
+      fullName,
+      phone,
+      service,
+      preferredDate,
+      preferredTime,
+      message
+    });
+
+    // 3. Attempt to send email notification (Resend)
     try {
       await sendAppointmentEmail({ fullName, phone, email, service, preferredDate, preferredTime, message });
     } catch (emailError) {
-      // Log the email failure but do NOT crash the response
-      console.error('⚠️ Gmail Service Blocked or Failed:', emailError.message);
-      console.warn('   The appointment was saved to the database, but the email alert could not be sent.');
+      console.error('⚠️ Email Notification Failed (Resend):', emailError.message);
     }
 
     console.log(`✅ Appointment saved for ${fullName}`);
+    
     return res.status(201).json({
       success: true,
-      message: 'Appointment request submitted successfully! Our team will review it shortly.',
+      message: 'Appointment request submitted successfully!',
       appointment,
+      whatsappLink // Return the link to the frontend
     });
 
   } catch (error) {
@@ -91,3 +95,4 @@ export const createAppointment = async (req, res) => {
     });
   }
 };
+
