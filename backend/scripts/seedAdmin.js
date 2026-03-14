@@ -1,20 +1,22 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import Admin from '../models/Admin.js';
-import connectDB from '../config/db.js';
 
-dotenv.config();
 
-const seedAdmin = async () => {
+export const seedAdmin = async () => {
   try {
-    await connectDB();
+    // Check if connected to DB
+    if (mongoose.connection.readyState !== 1) {
+      console.log('⚠️ Skipping Admin seed: Database not connected.');
+      return;
+    }
 
     const adminEmail = 'admin@dentalart.com';
+
     const adminExists = await Admin.findOne({ email: adminEmail });
 
     if (adminExists) {
-      console.log('⚠️ Admin user already exists');
-      process.exit();
+      console.log('⚠️ Admin user already exists. Skipping seed.');
+      return;
     }
 
     const admin = new Admin({
@@ -31,11 +33,8 @@ const seedAdmin = async () => {
     console.log('🔑 Password: adminpassword123');
     console.log('⚠️ Please change your password after first login.');
 
-    process.exit();
   } catch (error) {
     console.error('❌ Error seeding admin:', error.message);
-    process.exit(1);
   }
 };
 
-seedAdmin();

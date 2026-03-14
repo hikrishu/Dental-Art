@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import connectDB from './config/db.js';
+import { seedAdmin } from './scripts/seedAdmin.js';
 import contactRoutes from './routes/contactRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import adminAuthRoutes from './routes/adminAuthRoutes.js';
@@ -17,8 +18,10 @@ dotenv.config();
 
 const app = express();
 
-// --- 1. Connect to MongoDB ---
-connectDB();
+// --- 1. Connect to MongoDB & Auto-Seed Admin ---
+await connectDB();
+await seedAdmin();
+
 
 // --- 2. Request Logger (For Render Debugging) ---
 app.use((req, res, next) => {
