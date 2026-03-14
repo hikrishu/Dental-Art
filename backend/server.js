@@ -16,7 +16,17 @@ import adminContactRoutes from './routes/adminContactRoutes.js';
 // Load environment variables
 dotenv.config();
 
+// Required Environment Variables Check
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'CLINIC_PHONE_NUMBER'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.warn(`\n⚠️  WARNING: Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.warn(`   The app may not function correctly on Render without these.\n`);
+}
+
 const app = express();
+
 
 // --- 1. Connect to MongoDB & Auto-Seed Admin ---
 await connectDB();

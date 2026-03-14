@@ -53,12 +53,22 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login Error:', error);
+    console.error('❌ LOGIN ERROR:', error.message);
+    
+    // Check if it's a JWT related error (usually missing secret)
+    if (error.message && error.message.includes('secretOrPrivateKey')) {
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error: JWT_SECRET is missing.'
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
   }
+
 };
 
 /**

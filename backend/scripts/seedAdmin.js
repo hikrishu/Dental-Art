@@ -3,14 +3,17 @@ import Admin from '../models/Admin.js';
 
 
 export const seedAdmin = async () => {
+  console.log('🌱 Starting Admin seeding process...');
   try {
     // Check if connected to DB
     if (mongoose.connection.readyState !== 1) {
-      console.log('⚠️ Skipping Admin seed: Database not connected.');
+      console.log('⚠️  Skipping Admin seed: Database not connected (readyState:', mongoose.connection.readyState, ')');
       return;
     }
 
     const adminEmail = 'admin@dentalart.com';
+    console.log(`🔍 Checking if admin ${adminEmail} exists...`);
+
 
     const adminExists = await Admin.findOne({ email: adminEmail });
 
