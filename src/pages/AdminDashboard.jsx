@@ -37,6 +37,7 @@ const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState(null); // For detail modal
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwLoading, setPwLoading] = useState(false);
   const [pwStatus, setPwStatus] = useState({ type: '', msg: '' });
@@ -182,102 +183,150 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const SidebarContent = () => (
+    <>
+      <div className="p-8 border-b border-slate-100/80 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-teal-200 ring-2 ring-teal-50 ring-offset-0">
+            <Calendar size={20} />
+          </div>
+          <div>
+            <h1 className="font-black text-slate-900 leading-tight text-lg tracking-tight">Dental Art</h1>
+            <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] mt-0.5">Administrator</p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+        <div className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Main Menu</div>
+        <button 
+          onClick={() => { setActiveTab('appointments'); setIsMobileMenuOpen(false); }}
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group ${activeTab === 'appointments' ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+        >
+          <Calendar size={20} className={activeTab === 'appointments' ? 'text-white' : 'group-hover:text-teal-600'} />
+          <span className="font-bold text-sm tracking-tight">Appointments</span>
+          {activeTab !== 'appointments' && stats.new > 0 && (
+            <span className="ml-auto w-5 h-5 bg-teal-100 text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center">{stats.new}</span>
+          )}
+        </button>
+        <button 
+          onClick={() => { setActiveTab('contacts'); setIsMobileMenuOpen(false); }}
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group ${activeTab === 'contacts' ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+        >
+          <MessageSquare size={20} className={activeTab === 'contacts' ? 'text-white' : 'group-hover:text-teal-600'} />
+          <span className="font-bold text-sm tracking-tight">Inbox</span>
+          {activeTab !== 'contacts' && stats.unreadMessages > 0 && (
+            <span className="ml-auto w-5 h-5 bg-amber-100 text-amber-600 text-[10px] font-black rounded-full flex items-center justify-center">{stats.unreadMessages}</span>
+          )}
+        </button>
+
+        <div className="pt-4 px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Settings</div>
+        <button 
+          onClick={() => { setIsPasswordModalOpen(true); setIsMobileMenuOpen(false); }}
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all text-slate-500 hover:bg-slate-50 hover:text-slate-900 group"
+        >
+          <Lock size={20} className="group-hover:text-teal-600" />
+          <span className="font-bold text-sm tracking-tight">Change Password</span>
+        </button>
+      </nav>
+
+      <div className="p-6 mt-auto">
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100/50 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-teal-600 shadow-sm">
+              <User size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-slate-900 truncate tracking-tight">{admin?.name}</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Super Admin</p>
+            </div>
+          </div>
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-red-500 bg-red-50/50 hover:bg-red-50 transition-all font-bold text-xs ring-1 ring-red-100/50"
+          >
+            <LogOut size={14} />
+            <span>Log Out Securely</span>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans text-slate-900 selection:bg-teal-100 selection:text-teal-900">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans text-slate-900 selection:bg-teal-100 selection:text-teal-900 overflow-x-hidden">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="p-8 border-b border-slate-100/80 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-teal-200 ring-2 ring-teal-50 ring-offset-0">
-              <Calendar size={20} />
-            </div>
-            <div>
-              <h1 className="font-black text-slate-900 leading-tight text-lg tracking-tight">Dental Art</h1>
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] mt-0.5">Administrator</p>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
-          <div className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Main Menu</div>
-          <button 
-            onClick={() => setActiveTab('appointments')}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group ${activeTab === 'appointments' ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
-          >
-            <Calendar size={20} className={activeTab === 'appointments' ? 'text-white' : 'group-hover:text-teal-600'} />
-            <span className="font-bold text-sm tracking-tight">Appointments</span>
-            {activeTab !== 'appointments' && stats.new > 0 && (
-              <span className="ml-auto w-5 h-5 bg-teal-100 text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center">{stats.new}</span>
-            )}
-          </button>
-          <button 
-            onClick={() => setActiveTab('contacts')}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group ${activeTab === 'contacts' ? 'bg-teal-600 text-white shadow-lg shadow-teal-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
-          >
-            <MessageSquare size={20} className={activeTab === 'contacts' ? 'text-white' : 'group-hover:text-teal-600'} />
-            <span className="font-bold text-sm tracking-tight">Inbox</span>
-            {activeTab !== 'contacts' && stats.unreadMessages > 0 && (
-              <span className="ml-auto w-5 h-5 bg-amber-100 text-amber-600 text-[10px] font-black rounded-full flex items-center justify-center">{stats.unreadMessages}</span>
-            )}
-          </button>
-
-          <div className="pt-4 px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Settings</div>
-          <button 
-            onClick={() => setIsPasswordModalOpen(true)}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all text-slate-500 hover:bg-slate-50 hover:text-slate-900 group"
-          >
-            <Lock size={20} className="group-hover:text-teal-600" />
-            <span className="font-bold text-sm tracking-tight">Change Password</span>
-          </button>
-        </nav>
-
-        <div className="p-6 mt-auto">
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100/50 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-teal-600 shadow-sm">
-                <User size={18} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-black text-slate-900 truncate tracking-tight">{admin?.name}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Super Admin</p>
-              </div>
-            </div>
-            <button 
-              onClick={logout}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-red-500 bg-red-50/50 hover:bg-red-50 transition-all font-bold text-xs ring-1 ring-red-100/50"
-            >
-              <LogOut size={14} />
-              <span>Log Out Securely</span>
-            </button>
-          </div>
-        </div>
+        <SidebarContent />
       </aside>
 
+      {/* Mobile Drawer Navigation */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[40] md:hidden"
+            />
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 w-72 h-full bg-white z-[50] flex flex-col shadow-2xl md:hidden"
+            >
+              <SidebarContent />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Main Container */}
-      <main className="flex-1 flex flex-col max-h-screen relative">
+      <main className="flex-1 flex flex-col md:max-h-screen relative min-w-0">
         {/* Header - Fixed */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-5 sticky top-0 z-10">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-5 sticky top-0 z-10 w-full overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 text-sm text-slate-400 font-bold mb-1">
-                <span>Dashboard</span>
-                <ChevronRight size={14} />
-                <span className="text-teal-600">{activeTab === 'appointments' ? 'Appointments' : 'Messages'}</span>
+            <div className="flex items-center justify-between w-full lg:w-auto">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="p-2 -ml-2 text-slate-600 hover:text-teal-600 md:hidden bg-slate-100 rounded-xl transition-all"
+                >
+                  <MoreVertical size={24} className="rotate-90 md:rotate-0" />
+                </button>
+                <div>
+                  <div className="flex items-center gap-3 text-sm text-slate-400 font-bold mb-1">
+                    <span className="hidden sm:inline">Dashboard</span>
+                    <ChevronRight size={14} className="hidden sm:inline" />
+                    <span className="text-teal-600">{activeTab === 'appointments' ? 'Appointments' : 'Messages'}</span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">
+                    {activeTab === 'appointments' ? 'Clinic Schedule' : 'Patient Inbox'}
+                  </h2>
+                </div>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tighter">
-                {activeTab === 'appointments' ? 'Clinic Schedule' : 'Patient Inbox'}
-              </h2>
+              
+              <button 
+                onClick={fetchData} 
+                className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-teal-600 hover:border-teal-200 hover:bg-teal-50/50 transition-all shadow-sm flex-shrink-0 lg:hidden"
+                title="Refresh Data"
+              >
+                <TrendingUp size={18} className={loading ? 'animate-pulse' : ''} />
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <form onSubmit={handleSearch} className="relative group/search">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <form onSubmit={handleSearch} className="relative group/search flex-1 min-w-0">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-teal-600 transition-colors" size={18} />
                 <input 
                   type="text" 
-                  placeholder={`Quick search ${activeTab}...`}
+                  placeholder={`Search...`}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-12 pr-6 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 w-full sm:w-80 transition-all placeholder:text-slate-400"
+                  className="pl-12 pr-6 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 w-full lg:w-80 transition-all placeholder:text-slate-400 shadow-inner"
                 />
               </form>
               
@@ -287,7 +336,7 @@ const AdminDashboard = () => {
                   <select 
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="pl-12 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 appearance-none transition-all cursor-pointer min-w-[160px]"
+                    className="pl-12 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 appearance-none transition-all cursor-pointer min-w-full sm:min-w-[160px] shadow-inner"
                   >
                     <option value="">All Statuses</option>
                     <option value="New">Status: New</option>
@@ -301,7 +350,7 @@ const AdminDashboard = () => {
 
               <button 
                 onClick={fetchData} 
-                className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:text-teal-600 hover:border-teal-200 hover:bg-teal-50/50 transition-all shadow-sm flex-shrink-0"
+                className="hidden lg:flex p-3 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:text-teal-600 hover:border-teal-200 hover:bg-teal-50/50 transition-all shadow-sm flex-shrink-0"
                 title="Refresh Data"
               >
                 <TrendingUp size={20} className={loading ? 'animate-pulse' : ''} />
@@ -309,6 +358,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </header>
+
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-8 space-y-8">
